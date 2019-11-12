@@ -16,7 +16,7 @@ object PubSubProducer {
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.empty()
     implicit val sys: ActorSystem = ActorSystem("PubSubProducer", config)
-    implicit val mat: ActorMaterializer = ActorMaterializer()
+    implicit val mat = ActorMaterializer()
     implicit val ec: ExecutionContextExecutor = sys.dispatcher
 
     val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9090).withTls(false)
@@ -25,9 +25,8 @@ object PubSubProducer {
     val stdinSource: Source[ByteString, Future[IOResult]] = StreamConverters.fromInputStream(() => System.in)
 
     stdinSource
-      .runForeach(input => client.emitEvent(EventRequest(input.utf8String, "topic")))
-      .onComplete { case Failure(exception) => println(exception) }
-
+        .runForeach(input => client.emitEvent(EventRequest(input.utf8String, "topic")))
+        .onComplete { case Failure(exception) => println(exception) }
 
   }
 }

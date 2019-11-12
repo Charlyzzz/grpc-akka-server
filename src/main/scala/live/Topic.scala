@@ -14,8 +14,6 @@ case class AvailableSubscribers(listing: Receptionist.Listing, msg: String) exte
 
 object Topic {
 
-  def key(topicName: String): ServiceKey[String] = ServiceKey[String](topicName)
-
   def apply(topicName: String): Behavior[TopicAction] = Behaviors.setup[TopicAction] { context =>
     Behaviors.receiveMessage {
       case AddSubscriber(subscriber) =>
@@ -30,6 +28,8 @@ object Topic {
         Behaviors.same
     }
   }
+
+  def key(topicName: String): ServiceKey[String] = ServiceKey[String](topicName)
 
 
 }

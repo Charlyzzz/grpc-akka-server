@@ -1,13 +1,8 @@
 package live
 
-/*
- * Copyright (C) 2018-2019 Lightbend Inc. <https://www.lightbend.com>
- */
-
-//#full-server
-
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.cluster.Cluster
+import akka.cluster.pubsub.{DistributedPubSub, DistributedPubSubMediator}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.management.cluster.bootstrap.ClusterBootstrap
@@ -27,7 +22,6 @@ object PubSubServer {
 class PubSubServer(system: ActorSystem) {
 
   def run(): Future[Http.ServerBinding] = {
-    // Akka boot up code
     implicit val sys: ActorSystem = system
     implicit val mat: Materializer = ActorMaterializer()
     implicit val ec: ExecutionContext = sys.dispatcher
@@ -37,6 +31,17 @@ class PubSubServer(system: ActorSystem) {
     ClusterBootstrap(system).start()
 
     Cluster(system).registerOnMemberUp(system.log.info("Cluster is up!"))
+
+    system.actorOf(Props(new Actor with ActorLogging {
+      val mediator = DistributedPubSub(context.system).mediator
+
+      mediator ! DistributedPubSubMediator.Publish("a","Hola!")
+
+      override def receive: Receive = {
+        case a => log.warning(s"$a")
+      }
+    }))
+
 
     // Create service handlers
     val service: HttpRequest => Future[HttpResponse] =
@@ -55,7 +60,7 @@ class PubSubServer(system: ActorSystem) {
 
     // report successful binding
     binding.foreach { binding =>
-      println(s"gRPC server bound to: ${binding.localAddress}")
+      println(s"gRPC server bound to: ${ binding.localAddress }")
     }
 
     binding

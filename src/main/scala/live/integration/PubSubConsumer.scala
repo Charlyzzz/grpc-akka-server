@@ -23,7 +23,7 @@ object PubSubConsumer {
     val respuestas = client.subscribe(SubRequest("topic"))
 
     val x = respuestas.runFold(0)((numero, evento) => {
-      println(s"Msg #$numero: ${evento.message}")
+      println(s"Msg #$numero: ${ evento.message }")
       numero + 1
     })
 
