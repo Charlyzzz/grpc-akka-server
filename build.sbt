@@ -19,3 +19,11 @@ libraryDependencies ++= Seq(
 enablePlugins(AkkaGrpcPlugin)
 enablePlugins(MultiJvmPlugin)
 configs(MultiJvm)
+
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
+maintainer in Docker := "Erwin Debusschere <erwincdl@gmail.com>"
+packageSummary in Docker := "Live"
+packageDescription := "Live server"
+dockerEntrypoint := Seq("/opt/docker/bin/live-server")

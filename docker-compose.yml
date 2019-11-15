@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  live-cluster:
+    image: live:0.1
+    expose:
+      - 8558
+      - 2552
+      - 8080

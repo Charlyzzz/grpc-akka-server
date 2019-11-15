@@ -40,7 +40,7 @@ class LiveServer(system: ActorSystem) {
     // Bind service handler servers to localhost:8080/8081
     val binding = Http().bindAndHandleAsync(
       handler,
-      interface = "127.0.0.1",
+      interface = "0.0.0.0",
       port = scala.sys.env("GRPC_PORT").toInt,
       connectionContext = HttpConnectionContext())
 
