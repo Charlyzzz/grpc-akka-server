@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaTypedVersion,
   "org.scalatest" %% "scalatest" % "3.0.8" % Test
 )
+
 enablePlugins(AkkaGrpcPlugin)
 enablePlugins(MultiJvmPlugin)
 configs(MultiJvm)

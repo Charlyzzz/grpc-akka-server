@@ -1,8 +1,7 @@
 package live
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.cluster.Cluster
-import akka.cluster.pubsub.{DistributedPubSub, DistributedPubSubMediator}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.management.cluster.bootstrap.ClusterBootstrap
@@ -27,25 +26,12 @@ class PubSubServer(system: ActorSystem) {
     implicit val ec: ExecutionContext = sys.dispatcher
 
     AkkaManagement(system).start()
-
     ClusterBootstrap(system).start()
-
     Cluster(system).registerOnMemberUp(system.log.info("Cluster is up!"))
 
-    system.actorOf(Props(new Actor with ActorLogging {
-      val mediator = DistributedPubSub(context.system).mediator
-
-      mediator ! DistributedPubSubMediator.Publish("a","Hola!")
-
-      override def receive: Receive = {
-        case a => log.warning(s"$a")
-      }
-    }))
-
-
-    // Create service handlers
     val service: HttpRequest => Future[HttpResponse] =
       PubSubHandler(new PubSubImpl)
+
     val handler: HttpRequest => Future[HttpResponse] = { request =>
       val withoutEncoding = request.copy(headers = request.headers.filterNot(_.name == "grpc-accept-encoding"))
       service(withoutEncoding)
@@ -60,11 +46,9 @@ class PubSubServer(system: ActorSystem) {
 
     // report successful binding
     binding.foreach { binding =>
-      println(s"gRPC server bound to: ${ binding.localAddress }")
+      println(s"gRPC server bound to: ${binding.localAddress}")
     }
 
     binding
   }
 }
-
-//#full-server
