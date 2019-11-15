@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
 import akka.stream.scaladsl.SourceQueueWithComplete
 
-case class Subscriber(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub2) extends Actor with ActorLogging {
+case class Subscriber(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub) extends Actor with ActorLogging {
 
   import context._
 
@@ -26,5 +26,5 @@ case class Subscriber(queue: SourceQueueWithComplete[Event], topic: String, pubS
 }
 
 object Subscriber {
-  def props(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub2): Props = Props(new Subscriber(queue, topic, pubSub))
+  def props(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub): Props = Props(new Subscriber(queue, topic, pubSub))
 }

@@ -10,15 +10,15 @@ import akka.stream.{ActorMaterializer, Materializer}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object PubSubServer {
+object LiveServer {
 
   def main(args: Array[String]): Unit = {
     val system = ActorSystem("live-cluster")
-    new PubSubServer(system).run()
+    new LiveServer(system).run()
   }
 }
 
-class PubSubServer(system: ActorSystem) {
+class LiveServer(system: ActorSystem) {
 
   def run(): Future[Http.ServerBinding] = {
     implicit val sys: ActorSystem = system
@@ -30,7 +30,7 @@ class PubSubServer(system: ActorSystem) {
     Cluster(system).registerOnMemberUp(system.log.info("Cluster is up!"))
 
     val service: HttpRequest => Future[HttpResponse] =
-      PubSubHandler(new PubSubImpl)
+      LiveHandler(new LiveImpl)
 
     val handler: HttpRequest => Future[HttpResponse] = { request =>
       val withoutEncoding = request.copy(headers = request.headers.filterNot(_.name == "grpc-accept-encoding"))

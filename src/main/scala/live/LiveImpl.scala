@@ -11,14 +11,14 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
 
-class PubSubImpl(implicit mat: Materializer, actorSystem: ActorSystem) extends PubSub {
+class LiveImpl(implicit mat: Materializer, actorSystem: ActorSystem) extends Live {
 
   val typedSystem: typed.ActorSystem[_] = actorSystem.toTyped
   implicit val context: ExecutionContextExecutor = actorSystem.dispatcher
   implicit val timeout: Timeout = 5.second
   implicit val scheduler: Scheduler = typedSystem.scheduler
 
-  val pubSub: PubSub2 = PubSub2(actorSystem)
+  val pubSub: PubSub = PubSub(actorSystem)
 
   override def subscribe(in: SubRequest): Source[Event, NotUsed] = {
     val (queue, source) = Source.queue[Event](1000, OverflowStrategy.dropNew).preMaterialize

@@ -7,6 +7,7 @@ import akka.remote.testconductor.RoleName
 import akka.remote.testkit.{MultiNodeConfig, MultiNodeSpec}
 import akka.testkit.{ImplicitSender, TestProbe}
 import com.typesafe.config.ConfigFactory
+import live.PubSub
 
 import scala.concurrent.duration._
 
@@ -14,7 +15,8 @@ object DistributedPubSubSpec extends MultiNodeConfig {
   val first = role("first")
   val second = role("second")
 
-  commonConfig(ConfigFactory.parseString("""
+  commonConfig(ConfigFactory.parseString(
+    """
       |
       |akka.loglevel = INFO
       |akka.actor.provider = cluster
@@ -27,6 +29,7 @@ class PubSubMediatorMultiJvmNode1 extends DistributedPubSubSpec
 class PubSubMediatorMultiJvmNode2 extends DistributedPubSubSpec
 
 class DistributedPubSubSpec extends MultiNodeSpec(DistributedPubSubSpec) with STMultiNodeSpec with ImplicitSender {
+
   import DistributedPubSubSpec._
   import akka.cluster.pubsub.DistributedPubSubMediator._
 
@@ -67,13 +70,13 @@ class DistributedPubSubSpec extends MultiNodeSpec(DistributedPubSubSpec) with ST
     "publish across nodes" in within(10.seconds) {
       val subscriber = TestProbe()
       val topic = "Watches"
-      mediator ! Subscribe(topic, subscriber.ref)
+      PubSub(system).subscribe(topic, subscriber.ref)
       expectMsgType[SubscribeAck]
       awaitCount(2)
 
       val msg = "Hola"
       runOn(first) {
-        mediator ! Publish(topic, msg)
+        PubSub(system).publish(topic, msg)
       }
 
       subscriber.expectMsg(msg)
