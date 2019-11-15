@@ -27,7 +27,7 @@ class LiveServer(system: ActorSystem) {
 
     AkkaManagement(system).start()
     ClusterBootstrap(system).start()
-    Cluster(system).registerOnMemberUp(system.log.info("Cluster is up!"))
+    Cluster(system).registerOnMemberUp(system.log.info("Member is up!"))
 
     val service: HttpRequest => Future[HttpResponse] =
       LiveHandler(new LiveImpl)
