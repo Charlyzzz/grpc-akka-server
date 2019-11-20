@@ -74,7 +74,7 @@ class DistributedPubSubSpec extends MultiNodeSpec(DistributedPubSubSpec) with ST
       expectMsgType[SubscribeAck]
       awaitCount(2)
 
-      val msg = "Hola"
+      val msg = "Seiko SRP777"
       runOn(first) {
         PubSub(system).publish(topic, msg)
       }
