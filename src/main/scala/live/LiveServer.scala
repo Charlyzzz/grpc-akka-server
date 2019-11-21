@@ -7,13 +7,16 @@ import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
 import akka.stream.{ActorMaterializer, Materializer}
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object LiveServer {
 
   def main(args: Array[String]): Unit = {
-    val system = ActorSystem("live-cluster")
+    val env = sys.env.getOrElse("ENV", "dev")
+    val config = ConfigFactory.load(env)
+    val system = ActorSystem("live-cluster", config)
     new LiveServer(system).run()
   }
 }
@@ -27,7 +30,7 @@ class LiveServer(system: ActorSystem) {
 
     AkkaManagement(system).start()
     ClusterBootstrap(system).start()
-    Cluster(system).registerOnMemberUp(system.log.info("Cluster is up!"))
+    Cluster(system).registerOnMemberUp(system.log.info("Member is up!"))
 
     val service: HttpRequest => Future[HttpResponse] =
       LiveHandler(new LiveImpl)
@@ -37,14 +40,12 @@ class LiveServer(system: ActorSystem) {
       service(withoutEncoding)
     }
 
-    // Bind service handler servers to localhost:8080/8081
     val binding = Http().bindAndHandleAsync(
       handler,
-      interface = "127.0.0.1",
-      port = scala.sys.env("GRPC_PORT").toInt,
+      interface = "0.0.0.0",
+      port = scala.sys.env.getOrElse("GRPC_PORT", "8080").toInt,
       connectionContext = HttpConnectionContext())
 
-    // report successful binding
     binding.foreach { binding =>
       println(s"gRPC server bound to: ${binding.localAddress}")
     }

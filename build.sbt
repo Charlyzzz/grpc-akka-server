@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-kafka" % "1.1.0",
   "com.typesafe.akka" %% "akka-actor-typed" % akkaTypedVersion,
   "com.typesafe.akka" %% "akka-cluster-typed" % akkaTypedVersion,
+  "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % "1.0.5",
 
   "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaTypedVersion,
   "org.scalatest" %% "scalatest" % "3.0.8" % Test
@@ -19,3 +20,12 @@ libraryDependencies ++= Seq(
 enablePlugins(AkkaGrpcPlugin)
 enablePlugins(MultiJvmPlugin)
 configs(MultiJvm)
+
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
+maintainer in Docker := "Erwin Debusschere <erwincdl@gmail.com>"
+packageSummary in Docker := "Live"
+packageDescription := "Live server"
+dockerEntrypoint := Seq("/opt/docker/bin/live-server")
+dockerExposedPorts := Seq(8558, 2552, 8080)

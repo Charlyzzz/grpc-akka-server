@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  live-cluster:
+    image: live:0.1
+    expose:
+      - 8558
+      - 2552
+      - 8080
+    environment:
+      - ENV=discovery
+
+  gateway:
+    image: envoyproxy/envoy-alpine:latest
+    expose:
+      - 9900
+      - 9901
+    ports:
+      - 9900:9900
+      - 9901:9901
+    volumes:
+      - $PWD/envoy.yaml:/etc/envoy/envoy.yaml
