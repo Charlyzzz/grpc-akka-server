@@ -7,13 +7,16 @@ import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
 import akka.stream.{ActorMaterializer, Materializer}
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object LiveServer {
 
   def main(args: Array[String]): Unit = {
-    val system = ActorSystem("live-cluster")
+    val env = sys.env.getOrElse("ENV", "dev")
+    val config = ConfigFactory.load(env)
+    val system = ActorSystem("live-cluster", config)
     new LiveServer(system).run()
   }
 }

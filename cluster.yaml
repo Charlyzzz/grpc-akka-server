@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: live-cluster
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: live-cluster
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: live-cluster
+    spec:
+      containers:
+        - image: live:0.1
+          imagePullPolicy: Never
+          name: live-cluster
+          env:
+            - name: ENV
+              value: kubernetes
+          ports:
+            - name: remoting
+              containerPort: 2552
+            - name: grpc
+              containerPort: 8080
+            - name: management
+              containerPort: 8558
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: management
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: management
+            initialDelaySeconds: 15
