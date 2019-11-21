@@ -17,7 +17,7 @@ object LiveConsumer {
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContextExecutor = sys.dispatcher
 
-    val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9090)
+    val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9900).withTls(false)
     val client: Live = LiveClient(clientSettings)
 
     val respuestas = client.subscribe(SubRequest("topic"))

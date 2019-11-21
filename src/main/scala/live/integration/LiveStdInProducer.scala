@@ -18,17 +18,18 @@ object LiveStdInProducer {
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContextExecutor = sys.dispatcher
 
-    val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9090).withTls(false)
+    val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9900).withTls(false)
     val client: Live = LiveClient(clientSettings)
 
     val stdinSource: Source[ByteString, Future[IOResult]] = StreamConverters.fromInputStream(() => System.in)
 
     stdinSource
-      .runForeach(input => client.emitEvent(EventRequest(input.utf8String, "topic")))
+      .map(_.utf8String)
+      .filter(_.trim.nonEmpty)
+      .runForeach(input => client.emitEvent(EventRequest(input, "topic")))
       .onComplete {
         case Failure(exception) => println(exception)
         case _ => println("Done!")
       }
-
   }
 }
