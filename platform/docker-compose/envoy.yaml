@@ -18,14 +18,15 @@ static_resources:
                 access_log:
                   - name: envoy.file_access_log
                     config:
-                      path: "/dev/stdout"
+                      path: /tmp/access.log
                 route_config:
                   name: local_route
                   virtual_hosts:
                     - name: local_service
                       domains: ["*"]
                       routes:
-                        - match: { prefix: "/" }
+                        - match:
+                            prefix: "/"
                           route:
                             cluster: live
                             timeout: 0s
