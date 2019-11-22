@@ -9,29 +9,26 @@ import live.{Live, LiveClient, SubRequest}
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
-object LiveConsumer {
+object LiveConsumer extends App {
 
-  def main(args: Array[String]): Unit = {
+  implicit val sys: ActorSystem = ActorSystem("LiveConsumer", ConfigFactory.empty())
+  implicit val mat: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContextExecutor = sys.dispatcher
 
-    implicit val sys: ActorSystem = ActorSystem("LiveConsumer", ConfigFactory.empty())
-    implicit val mat: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContextExecutor = sys.dispatcher
+  val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9900).withTls(false)
+  val client: Live = LiveClient(clientSettings)
 
-    val clientSettings = GrpcClientSettings.connectToServiceAt("127.0.0.1", 9900).withTls(false)
-    val client: Live = LiveClient(clientSettings)
+  val respuestas = client.subscribe(SubRequest("topic"))
 
-    val respuestas = client.subscribe(SubRequest("topic"))
+  val done = respuestas.runFold(0)((numero, evento) => {
+    println(s"Msg #$numero: ${evento.message}")
+    numero + 1
+  })
 
-    val x = respuestas.runFold(0)((numero, evento) => {
-      println(s"Msg #$numero: ${evento.message}")
-      numero + 1
-    })
-
-    x.onComplete {
-      case Success(_) =>
-        println("stream finalizado")
-      case Failure(e) =>
-        println(s"Error: $e")
-    }
+  done.onComplete {
+    case Success(_) =>
+      println("stream finalizado")
+    case Failure(e) =>
+      println(s"Error: $e")
   }
 }
