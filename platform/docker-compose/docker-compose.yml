@@ -7,11 +7,12 @@ services:
       - 8558
       - 2552
       - 8080
+      - 9090
     environment:
       - ENV=discovery
 
   gateway:
-    image: envoyproxy/envoy-alpine:latest
+    image: envoyproxy/envoy-alpine:v1.12.0
     expose:
       - 9900
       - 9901

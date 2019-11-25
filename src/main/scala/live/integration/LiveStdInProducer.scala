@@ -12,7 +12,7 @@ import scala.util.Failure
 
 object LiveStdInProducer extends App {
 
-  implicit val sys: ActorSystem = ActorSystem("LiveStdInProducer", ConfigFactory.empty)
+  implicit val sys: ActorSystem = ActorSystem("ConstantRateProducer", ConfigFactory.empty)
   implicit val mat: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContextExecutor = sys.dispatcher
 
@@ -24,7 +24,7 @@ object LiveStdInProducer extends App {
   stdinSource
     .map(_.utf8String)
     .filter(_.trim.nonEmpty)
-    .runForeach(input => client.emitEvent(EventRequest(input, "topic")))
+    .runForeach(input => client.emitEvent(EventRequest(input, "example")))
     .onComplete {
       case Failure(exception) => println(exception)
       case _ => println("Done!")
