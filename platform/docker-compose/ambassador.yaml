@@ -1,0 +1,27 @@
+---
+apiVersion: ambassador/v1
+kind: Module
+name: ambassador
+config:
+  enable_grpc_web: true
+  envoy_log_path: "/tmp/access_log"
+  cors:
+    origins: "*"
+    methods: GET, PUT, DELETE, POST, OPTIONS
+    headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,custom-header-1,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout
+    exposed_headers: custom-header-1,grpc-status,grpc-message
+---
+apiVersion: getambassador.io/v1
+kind: Mapping
+name: live-grpc
+grpc: True
+prefix: /
+service: live-cluster:8080
+timeout_ms: 0
+---
+apiVersion: getambassador.io/v1
+kind: Mapping
+name: live-ws
+use_websocket: true
+prefix: /ws
+service: live-cluster:9090
