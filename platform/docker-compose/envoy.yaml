@@ -33,10 +33,10 @@ static_resources:
                             cluster: live_ws
                             prefix_rewrite: "/"
                         - match:
-                            prefix: "/grpc/"
+                            prefix: "/"
                           route:
                             cluster: live_grpc
-                            prefix_rewrite: "/"
+                            #prefix_rewrite: "/"
                             max_grpc_timeout: 0s
                       cors:
                         allow_origin_string_match:
@@ -63,7 +63,7 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
+                      address: live-cluster
                       port_value: 9090
     - name: live_grpc
       connect_timeout: 0.25s
@@ -77,5 +77,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
+                      address: live-cluster
                       port_value: 8080

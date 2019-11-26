@@ -29,9 +29,7 @@ class LiveImpl(implicit mat: Materializer, actorSystem: ActorSystem, converter: 
   override def emitEvent(in: EventRequest): Future[EmitAck] = {
     if (in.event.nonEmpty)
       pubSub.publish(in.topic, in.event)
-    Future {
-      EmitAck()
-    }
+    Future(EmitAck())
   }
 }
 

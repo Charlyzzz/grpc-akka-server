@@ -21,12 +21,12 @@ case class Subscriber[T](queue: SourceQueueWithComplete[T], topic: String, pubSu
 
   def listeningTopic: Receive = {
     case msg: String =>
-      log.info(msg)
+      log.debug(msg)
       queue.offer(converter(msg))
   }
 
   def stop(): Unit = {
-    log.info("Queue shut down")
+    log.debug("Queue shut down")
     context.stop(self)
   }
 }
