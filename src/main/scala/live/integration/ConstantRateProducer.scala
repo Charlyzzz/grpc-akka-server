@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Failure
 
-object ConstantRateProducer extends GrpcIntegrationClient(port = 9900) {
+object ConstantRateProducer extends GrpcIntegrationClient {
 
   private val blitzkriegBop: List[(String, FiniteDuration)] = List(
     ("hey", 2.second),
@@ -20,15 +20,13 @@ object ConstantRateProducer extends GrpcIntegrationClient(port = 9900) {
     case (head@(word, delay)) :: rest =>
       Future(Some(rest :+ head, delayed(word, delay)))
   }
-      .map(Await.result(_, 5.seconds))
-      .map(EventRequest(_, "example"))
-      .runForeach {
-        client.emitEvent(_).onComplete {
-          case Failure(e) =>
-            println(e)
-            system.terminate()
-          case _ =>
-        }
+    .map(Await.result(_, 5.seconds))
+    .map(EventRequest(_, "example"))
+    .runForeach {
+      client.emitEvent(_).onComplete {
+        case Failure(e) => println(e)
+        case _ =>
       }
+    }
 }
 

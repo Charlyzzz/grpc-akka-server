@@ -26,7 +26,7 @@ case class Subscriber[T](queue: SourceQueueWithComplete[T], topic: String, pubSu
   }
 
   def stop(): Unit = {
-    log.debug("Queue shut down")
+    log.info("Queue shut down")
     context.stop(self)
   }
 }

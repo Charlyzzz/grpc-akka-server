@@ -14,8 +14,6 @@ trait Interface {
 }
 
 object Interfaces {
-
-  val localhost: String = "127.0.0.0"
-
+  val localhost: String = "127.0.0.1"
   val everywhere: String = "0.0.0.0"
 }

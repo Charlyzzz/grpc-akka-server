@@ -19,5 +19,7 @@ services:
     ports:
       - 9900:9900
       - 9901:9901
+    environment:
+      - loglevel=info
     volumes:
       - $PWD/envoy.yaml:/etc/envoy/envoy.yaml
