@@ -13,6 +13,8 @@ static_resources:
             - name: envoy.http_connection_manager
               typed_config:
                 "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
+                upgrade_configs:
+                  - upgrade_type: websocket
                 codec_type: auto
                 stat_prefix: ingress_http
                 access_log:
@@ -26,14 +28,20 @@ static_resources:
                       domains: ["*"]
                       routes:
                         - match:
+                            prefix: "/ws/"
+                          route:
+                            cluster: live_ws
+                            prefix_rewrite: "/"
+                        - match:
                             prefix: "/"
                           route:
-                            cluster: live
-                            timeout: 0s
+                            cluster: live_grpc
                             max_grpc_timeout: 0s
                       cors:
-                        allow_origin:
-                          - "*"
+                        allow_origin_string_match:
+                          safe_regex:
+                            regex: ".*"
+                            google_re2: {}
                         allow_methods: GET, PUT, DELETE, POST, OPTIONS
                         allow_headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,custom-header-1,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout
                         expose_headers: custom-header-1,grpc-status,grpc-message
@@ -43,13 +51,26 @@ static_resources:
                   - name: envoy.router
 
   clusters:
-    - name: live
+    - name: live_ws
+      connect_timeout: 0.25s
+      type: strict_dns
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: live_ws
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: live-cluster
+                      port_value: 9090
+    - name: live_grpc
       connect_timeout: 0.25s
       http2_protocol_options: {}
       type: strict_dns
       lb_policy: round_robin
       load_assignment:
-        cluster_name: live
+        cluster_name: live_grpc
         endpoints:
           - lb_endpoints:
               - endpoint:

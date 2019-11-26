@@ -3,12 +3,13 @@ package live
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
 import akka.stream.scaladsl.SourceQueueWithComplete
+import live.Subscriber.Converter
 
-case class Subscriber(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub) extends Actor with ActorLogging {
+case class Subscriber[T](queue: SourceQueueWithComplete[T], topic: String, pubSub: PubSub, converter: Converter[T]) extends Actor with ActorLogging {
 
   import context._
 
-  queue.watchCompletion().onComplete(_ => stop(self))
+  queue.watchCompletion().onComplete(_ => stop())
   pubSub.subscribe(topic, self)
 
   override def receive: Receive = {
@@ -20,11 +21,21 @@ case class Subscriber(queue: SourceQueueWithComplete[Event], topic: String, pubS
 
   def listeningTopic: Receive = {
     case msg: String =>
-      log.info(msg)
-      queue.offer(Event(msg))
+      log.debug(msg)
+      queue.offer(converter(msg))
+  }
+
+  def stop(): Unit = {
+    log.info("Queue shut down")
+    context.stop(self)
   }
 }
 
 object Subscriber {
-  def props(queue: SourceQueueWithComplete[Event], topic: String, pubSub: PubSub): Props = Props(new Subscriber(queue, topic, pubSub))
+
+  type Converter[T] = (String) => T
+
+  def props[T](queue: SourceQueueWithComplete[T], topic: String, pubSub: PubSub)(implicit converter: Converter[T]): Props =
+    Props(new Subscriber(queue, topic, pubSub, converter))
 }
+

@@ -2,14 +2,13 @@ package live
 
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
 import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
+import live.interfaces.{Grpc, Ws}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 object LiveServer extends App {
@@ -19,46 +18,43 @@ object LiveServer extends App {
   implicit val system: ActorSystem = ActorSystem("live-cluster", config)
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val mat: Materializer = ActorMaterializer()
+
   val log = system.log
 
-  Try(LiveServer.run) match {
+  Try(LiveServer.run()) match {
     case Failure(exception) =>
       log.error(exception, "Shutting down due to error")
       system.terminate()
     case Success(_) =>
-      log.info("Shutting down system")
   }
 
-  private def run: Future[Http.ServerBinding] = {
+  sys.addShutdownHook {
+    log.info("Shutting down system due to shutdown signal")
+    system.terminate()
+  }
+
+  private def run(): Unit = {
     startClusterFormation()
     val grpcPort = sys.env.getOrElse("GRPC_PORT", "8080").toInt
-    startGrpcServer(grpcPort)
+    val wsPort = sys.env.getOrElse("WS_PORT", "9090").toInt
+    start(
+      Grpc(grpcPort),
+      Ws(wsPort)
+    )
   }
 
-  private def startGrpcServer(port: Int): Future[Http.ServerBinding] = {
-    val service: HttpRequest => Future[HttpResponse] =
-      LiveHandler(new LiveImpl)
-
-    val handler: HttpRequest => Future[HttpResponse] = { request =>
-      val withoutEncoding = request.copy(headers = request.headers.filterNot(_.name == "grpc-accept-encoding"))
-      service(withoutEncoding)
+  private def start(interfaces: Interface*): Unit = {
+    interfaces.foreach { interface =>
+      val binding = interface.up
+      binding.foreach { binding =>
+        log.info(s"${interface.name} interface bound to: ${binding.localAddress}")
+      }
     }
-
-    val binding = Http().bindAndHandleAsync(
-      handler,
-      interface = "0.0.0.0",
-      port = port,
-      connectionContext = HttpConnectionContext())
-
-    binding.foreach { binding =>
-      log.info(s"gRPC server bound to: ${binding.localAddress}")
-    }
-    binding
   }
 
   private def startClusterFormation(): Unit = {
     AkkaManagement(system).start()
     ClusterBootstrap(system).start()
-    Cluster(system).registerOnMemberUp(system.log.info("Member is up!"))
+    Cluster(system).registerOnMemberUp(log.info("Member is up!"))
   }
 }

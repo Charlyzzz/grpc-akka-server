@@ -6,12 +6,12 @@ import akka.actor.{ActorSystem, Scheduler, typed}
 import akka.stream.scaladsl.Source
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.util.Timeout
+import live.Subscriber._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
-
-class LiveImpl(implicit mat: Materializer, actorSystem: ActorSystem) extends Live {
+class LiveImpl(implicit mat: Materializer, actorSystem: ActorSystem, converter: Converter[Event]) extends Live {
 
   val typedSystem: typed.ActorSystem[_] = actorSystem.toTyped
   implicit val context: ExecutionContextExecutor = actorSystem.dispatcher
@@ -29,8 +29,7 @@ class LiveImpl(implicit mat: Materializer, actorSystem: ActorSystem) extends Liv
   override def emitEvent(in: EventRequest): Future[EmitAck] = {
     if (in.event.nonEmpty)
       pubSub.publish(in.topic, in.event)
-    Future {
-      EmitAck()
-    }
+    Future(EmitAck())
   }
 }
+
