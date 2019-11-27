@@ -16,7 +16,7 @@ kind: Mapping
 name: live-grpc
 grpc: True
 prefix: /
-service: live-cluster:8080
+service: live:8080
 timeout_ms: 0
 ---
 apiVersion: getambassador.io/v1
@@ -24,4 +24,4 @@ kind: Mapping
 name: live-ws
 use_websocket: true
 prefix: /ws
-service: live-cluster:9090
+service: live:9090

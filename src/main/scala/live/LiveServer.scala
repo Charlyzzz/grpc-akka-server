@@ -15,7 +15,7 @@ object LiveServer extends App {
 
   val env = sys.env.getOrElse("ENV", "dev")
   val config = ConfigFactory.load(env)
-  implicit val system: ActorSystem = ActorSystem("live-cluster", config)
+  implicit val system: ActorSystem = ActorSystem("live", config)
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val mat: Materializer = ActorMaterializer()
 

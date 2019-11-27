@@ -1,12 +1,13 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: live-cluster
+  name: live
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: live-cluster
+      app: live
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -15,22 +16,24 @@ spec:
   template:
     metadata:
       labels:
-        app: live-cluster
+        app: live
     spec:
       containers:
         - image: live:0.1
           imagePullPolicy: Never
-          name: live-cluster
+          name: live
           env:
             - name: ENV
               value: kubernetes
           ports:
             - name: remoting
               containerPort: 2552
-            - name: grpc
-              containerPort: 8080
             - name: management
               containerPort: 8558
+            - name: grpc
+              containerPort: 8080
+            - name: ws
+              containerPort: 9090
           livenessProbe:
             httpGet:
               path: /alive
