@@ -4,7 +4,7 @@ import live.SubRequest
 
 import scala.util.{Failure, Success}
 
-object LiveConsumer extends GrpcIntegrationClient {
+object LiveConsumer extends GrpcIntegrationClient("192.168.99.103", 30986) {
 
   val respuestas = client.subscribe(SubRequest("example"))
 

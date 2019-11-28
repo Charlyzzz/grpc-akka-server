@@ -1,0 +1,194 @@
+[
+    {
+        "name": "http.80",
+        "virtualHosts": [
+            {
+                "name": "*:80",
+                "domains": [
+                    "*",
+                    "*:80"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/a",
+                            "caseSensitive": true
+                        },
+                        "route": {
+                            "cluster": "outbound|8080||live.istio.svc.cluster.local",
+                            "timeout": "0s",
+                            "retryPolicy": {
+                                "retryOn": "connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes",
+                                "numRetries": 2,
+                                "retryHostPredicate": [
+                                    {
+                                        "name": "envoy.retry_host_predicates.previous_hosts"
+                                    }
+                                ],
+                                "hostSelectionRetryMaxAttempts": "5",
+                                "retriableStatusCodes": [
+                                    503
+                                ]
+                            },
+                            "cors": {
+                                "allowOrigin": [
+                                    "*"
+                                ],
+                                "allowMethods": "GET,PUT,DELETE,POST,OPTIONS",
+                                "allowHeaders": "keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout",
+                                "exposeHeaders": "grpc-status,grpc-message",
+                                "filterEnabled": {
+                                    "defaultValue": {
+                                        "numerator": 100
+                                    }
+                                }
+                            },
+                            "maxGrpcTimeout": "0s"
+                        },
+                        "metadata": {
+                            "filterMetadata": {
+                                "istio": {
+                                    "config": "/apis/networking/v1alpha3/namespaces/istio/virtual-service/istio-live-virtual-service"
+                                }
+                            }
+                        },
+                        "decorator": {
+                            "operation": "live.istio.svc.cluster.local:8080/a*"
+                        },
+                        "typedPerFilterConfig": {
+                            "mixer": {
+                                "@type": "type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig",
+                                "disableCheckCalls": true,
+                                "mixerAttributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "stringValue": "live.istio.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "stringValue": "live"
+                                        },
+                                        "destination.service.namespace": {
+                                            "stringValue": "istio"
+                                        },
+                                        "destination.service.uid": {
+                                            "stringValue": "istio://istio/services/live"
+                                        }
+                                    }
+                                },
+                                "forwardAttributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "stringValue": "live.istio.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "stringValue": "live"
+                                        },
+                                        "destination.service.namespace": {
+                                            "stringValue": "istio"
+                                        },
+                                        "destination.service.uid": {
+                                            "stringValue": "istio://istio/services/live"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "match": {
+                            "prefix": "/",
+                            "caseSensitive": true
+                        },
+                        "route": {
+                            "cluster": "outbound|8080||live.istio.svc.cluster.local",
+                            "timeout": "0s",
+                            "retryPolicy": {
+                                "retryOn": "connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes",
+                                "numRetries": 2,
+                                "retryHostPredicate": [
+                                    {
+                                        "name": "envoy.retry_host_predicates.previous_hosts"
+                                    }
+                                ],
+                                "hostSelectionRetryMaxAttempts": "5",
+                                "retriableStatusCodes": [
+                                    503
+                                ]
+                            },
+                            "maxGrpcTimeout": "0s"
+                        },
+                        "metadata": {
+                            "filterMetadata": {
+                                "istio": {
+                                    "config": "/apis/networking/v1alpha3/namespaces/istio/virtual-service/istio-live"
+                                }
+                            }
+                        },
+                        "decorator": {
+                            "operation": "live.istio.svc.cluster.local:8080/*"
+                        },
+                        "typedPerFilterConfig": {
+                            "mixer": {
+                                "@type": "type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig",
+                                "disableCheckCalls": true,
+                                "mixerAttributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "stringValue": "live.istio.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "stringValue": "live"
+                                        },
+                                        "destination.service.namespace": {
+                                            "stringValue": "istio"
+                                        },
+                                        "destination.service.uid": {
+                                            "stringValue": "istio://istio/services/live"
+                                        }
+                                    }
+                                },
+                                "forwardAttributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "stringValue": "live.istio.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "stringValue": "live"
+                                        },
+                                        "destination.service.namespace": {
+                                            "stringValue": "istio"
+                                        },
+                                        "destination.service.uid": {
+                                            "stringValue": "istio://istio/services/live"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "validateClusters": false
+    },
+    {
+        "virtualHosts": [
+            {
+                "name": "backend",
+                "domains": [
+                    "*"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/stats/prometheus"
+                        },
+                        "route": {
+                            "cluster": "prometheus_stats"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

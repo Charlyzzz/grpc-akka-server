@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Failure
 
-object ConstantRateProducer extends GrpcIntegrationClient {
+object ConstantRateProducer extends GrpcIntegrationClient(address = "192.168.99.103", port = 30986) {
 
   private val blitzkriegBop: List[(String, FiniteDuration)] = List(
     ("hey", 2.second),
