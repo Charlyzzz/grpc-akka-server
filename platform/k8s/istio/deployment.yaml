@@ -27,7 +27,7 @@ metadata:
     app: live
     version: v1
 spec:
-  replicas: 2
+  replicas: 11
   selector:
     matchLabels:
       app: live
@@ -43,8 +43,8 @@ spec:
     spec:
       containers:
         - name: live
-          image: live:0.1
-          imagePullPolicy: Never
+          image: 528784232475.dkr.ecr.us-east-1.amazonaws.com/live:0.1
+          imagePullPolicy: Always
           env:
             - name: ENV
               value: kubernetes

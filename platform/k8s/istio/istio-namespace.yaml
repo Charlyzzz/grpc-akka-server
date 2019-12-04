@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: istio
+  name: live
   labels:
-    name: istio
+    name: live
     istio-injection: enabled
