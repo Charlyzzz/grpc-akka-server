@@ -25,13 +25,11 @@ object FloodProducer extends App {
   private val clientSettings = GrpcClientSettings.connectToServiceAt(address, port).withTls(false)
 
 
-
-
-  0.to(4).foreach { _ =>
+  0.to(3).foreach { _ =>
     val client: Live = LiveClient(clientSettings)
 
     Source.repeat("Hey apple!")
-      .throttle(100, 1.second)
+      .throttle(200, 1.second)
       .map(EventRequest(_, "example"))
       .runForeach {
         client.emitEvent(_).onComplete {
