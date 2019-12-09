@@ -3,10 +3,10 @@ package live.integration
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorSystem, Behavior, PostStop}
-import akka.grpc.GrpcClientSettings
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.settings.ConnectionPoolSettings
+import akka.io.Udp
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, StreamConverters}
 import akka.stream.{ActorMaterializer, KillSwitches}
 import akka.{NotUsed, actor}
@@ -18,6 +18,8 @@ import scala.util.{Failure, Success, Try}
 object DynamicProducer extends App {
 
   def times[T](n: Int)(action: => T): Unit = 1.to(n).foreach { _ => action }
+
+  Udp.SO.Broadcast
 
   val address = "aa3613ab0c22a44e2b1081b06b4667bd-1333606730.us-east-1.elb.amazonaws.com"
   val port = 80

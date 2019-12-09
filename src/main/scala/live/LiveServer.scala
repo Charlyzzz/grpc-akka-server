@@ -13,6 +13,8 @@ import scala.util.{Failure, Success, Try}
 
 object LiveServer extends App {
 
+  Try(throw new RuntimeException)
+
   val env = sys.env.getOrElse("ENV", "dev")
   val config = ConfigFactory.load(env)
   implicit val system: ActorSystem = ActorSystem("live", config)

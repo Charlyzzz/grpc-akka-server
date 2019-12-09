@@ -1,6 +1,6 @@
 name := "live"
 
-version := "0.1"
+version := "0.2"
 
 scalaVersion := "2.13.1"
 
@@ -27,5 +27,5 @@ enablePlugins(DockerPlugin)
 maintainer in Docker := "Erwin Debusschere <erwincdl@gmail.com>"
 packageSummary in Docker := "Live"
 packageDescription := "Live server"
-dockerEntrypoint := Seq("/opt/docker/bin/live-server")
+dockerEntrypoint := Seq("/opt/docker/bin/a")
 dockerExposedPorts := Seq(8558, 2552, 8080, 10100)
