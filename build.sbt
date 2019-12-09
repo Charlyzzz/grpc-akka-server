@@ -28,4 +28,4 @@ maintainer in Docker := "Erwin Debusschere <erwincdl@gmail.com>"
 packageSummary in Docker := "Live"
 packageDescription := "Live server"
 dockerEntrypoint := Seq("/opt/docker/bin/live-server")
-dockerExposedPorts := Seq(8558, 2552, 8080)
+dockerExposedPorts := Seq(8558, 2552, 8080, 10100)

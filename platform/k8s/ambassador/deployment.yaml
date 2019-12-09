@@ -43,6 +43,9 @@ spec:
     - name: ws
       port: 9090
       targetPort: 9090
+    - name: http
+      port: 10100
+      targetPort: 10100
   selector:
     app: live
 ---

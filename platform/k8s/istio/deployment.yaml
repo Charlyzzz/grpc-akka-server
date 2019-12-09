@@ -16,6 +16,8 @@ spec:
     port: 8080
   - name: ws
     port: 9090
+  - name: http
+    port: 10100
   selector:
     app: live
 ---
@@ -27,7 +29,7 @@ metadata:
     app: live
     version: v1
 spec:
-  replicas: 11
+  replicas: 3
   selector:
     matchLabels:
       app: live
@@ -38,12 +40,12 @@ spec:
         app: live
         version: v1
       annotations:
-        traffic.sidecar.istio.io/includeInboundPorts: "8080,9090"
+        traffic.sidecar.istio.io/includeInboundPorts: "8080,9090,10100"
         traffic.sidecar.istio.io/excludeOutboundPorts: "2552,8558"
     spec:
       containers:
         - name: live
-          image: 528784232475.dkr.ecr.us-east-1.amazonaws.com/live:0.1
+          image: 528784232475.dkr.ecr.us-east-1.amazonaws.com/live:0.1-http
           imagePullPolicy: Always
           env:
             - name: ENV
@@ -57,6 +59,8 @@ spec:
               containerPort: 8080
             - name: ws
               containerPort: 9090
+            - name: http
+              containerPort: 10100
           livenessProbe:
             httpGet:
               path: /alive
@@ -67,3 +71,13 @@ spec:
               path: /ready
               port: management
             initialDelaySeconds: 15
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - live
+              topologyKey: "kubernetes.io/hostname"

@@ -6,7 +6,7 @@ import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
 import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
-import live.interfaces.{Grpc, Ws}
+import live.interfaces.{Grpc, Http, Ws}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
@@ -37,9 +37,11 @@ object LiveServer extends App {
     startClusterFormation()
     val grpcPort = sys.env.getOrElse("GRPC_PORT", "8080").toInt
     val wsPort = sys.env.getOrElse("WS_PORT", "9090").toInt
+    val httpPort = sys.env.getOrElse("HTTP_PORT", "10100").toInt
     start(
       Grpc(grpcPort),
-      Ws(wsPort)
+      Ws(wsPort),
+      Http(httpPort)
     )
   }
 
@@ -47,7 +49,7 @@ object LiveServer extends App {
     interfaces.foreach { interface =>
       val binding = interface.up
       binding.foreach { binding =>
-        log.info(s"${interface.name} interface bound to: ${binding.localAddress}")
+        log.info(s"${ interface.name } interface bound to: ${ binding.localAddress }")
       }
     }
   }
