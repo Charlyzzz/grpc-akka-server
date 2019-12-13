@@ -16,6 +16,7 @@ object LiveServer extends App {
   val env = sys.env.getOrElse("ENV", "dev")
   val config = ConfigFactory.load(env)
   implicit val system: ActorSystem = ActorSystem("live", config)
+  val cluster: Cluster = Cluster(system)
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val mat: Materializer = ActorMaterializer()
 
@@ -30,7 +31,7 @@ object LiveServer extends App {
 
   sys.addShutdownHook {
     log.info("Shutting down system due to shutdown signal")
-    system.terminate()
+    cluster.leave(cluster.selfAddress)
   }
 
   private def run(): Unit = {
@@ -55,6 +56,6 @@ object LiveServer extends App {
   private def startClusterFormation(): Unit = {
     AkkaManagement(system).start()
     ClusterBootstrap(system).start()
-    Cluster(system).registerOnMemberUp(log.info("Member is up!"))
+    cluster.registerOnMemberUp(log.info("Member is up!"))
   }
 }

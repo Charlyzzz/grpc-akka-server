@@ -1,0 +1,76 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-live-gateway
+  namespace: live
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: istio-live-virtual-service
+  namespace: live
+spec:
+  hosts:
+    - "*"
+  gateways:
+  - istio-live-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            port:
+              number: 8080
+            host: live
+      corsPolicy:
+        allowOrigin:
+          - "*"
+        allowMethods:
+          - GET
+          - PUT
+          - DELETE
+          - POST
+          - OPTIONS
+        allowHeaders:
+          - keep-alive
+          - user-agent
+          - cache-control
+          - content-type
+          - content-transfer-encoding
+          - x-accept-content-transfer-encoding
+          - x-accept-response-streaming
+          - x-user-agent
+          - x-grpc-web
+          - grpc-timeout
+        exposeHeaders:
+          - grpc-status
+          - grpc-message
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: grpc-web-filter
+spec:
+  workloadLabels:
+    app: live
+  filters:
+    - listenerMatch:
+        listenerType: SIDECAR_INBOUND
+        listenerProtocol: HTTP
+      insertPosition:
+        index: FIRST
+      filterType: HTTP
+      filterName: "envoy.grpc_web"
+      filterConfig: {}
