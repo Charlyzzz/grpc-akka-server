@@ -17,7 +17,7 @@ object DynamicProducer extends App {
 
   def times[T](n: Int)(action: => T): Unit = 1.to(n).foreach { _ => action }
 
-  val address = "a7445122ec9f5453f89b9ef8a4ee630e-658052086.us-east-1.elb.amazonaws.com"
+  val address = "aa3613ab0c22a44e2b1081b06b4667bd-1333606730.us-east-1.elb.amazonaws.com"
   val port = 80
 
   val producer = Behaviors.setup[NotUsed] { ctx =>
